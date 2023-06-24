@@ -129,7 +129,7 @@ namespace cg::renderer
 					float2(0, 0),
 					float2{
 							static_cast<float>(width - 1),
-							static_cast<float>(height-1)
+							static_cast<float>(height - 1)
 					}))	;
 			float2 max_vertex = max(vertex_a, max(vertex_b, vertex_c));
 			float2 bounding_box_end = round(clamp(
