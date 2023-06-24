@@ -210,11 +210,11 @@ namespace cg::renderer
 					ray ray(position, ray_direction);
 					payload payload = trace_ray(ray, depth);
 					auto& history_pixel = history->item(x, y);
-					history_pixel += float3{
+					history_pixel += sqrt(float3{
 							payload.color.r,
 							payload.color.g,
 							payload.color.b,
-					} * frame_weight;
+					} * frame_weight);
 					if(frame_id == accumulation_num - 1)
 						render_target->item(x, y) = RT::from_float3(history_pixel);
 				}
@@ -293,7 +293,7 @@ namespace cg::renderer
 		}
 		constexpr int base_y = 3;
 		index = frame_id + 1;
-		inv_base = 1.f/base_x;
+		inv_base = 1.f/base_y;
 		fraction = inv_base;
 		while(index > 0){
 			result.y += static_cast<float>(index%base_y) * fraction;
@@ -315,9 +315,9 @@ namespace cg::renderer
 		aabb_max = max(aabb_max, triangle.b);
 		aabb_max = max(aabb_max, triangle.c);
 
-		aabb_min = max(aabb_min, triangle.a);
-		aabb_min = max(aabb_min, triangle.b);
-		aabb_min = max(aabb_min, triangle.c);
+		aabb_min = min(aabb_min, triangle.a);
+		aabb_min = min(aabb_min, triangle.b);
+		aabb_min = min(aabb_min, triangle.c);
 	}
 
 	template<typename VB>
