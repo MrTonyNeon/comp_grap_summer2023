@@ -78,7 +78,6 @@ namespace cg::renderer
 
 	protected:
 		std::vector<triangle<VB>> triangles;
-
 		float3 aabb_min;
 		float3 aabb_max;
 	};
