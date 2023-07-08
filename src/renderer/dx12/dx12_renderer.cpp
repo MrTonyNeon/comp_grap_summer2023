@@ -133,9 +133,7 @@ void cg::renderer::dx12_renderer::create_depth_buffer()
 void cg::renderer::dx12_renderer::create_command_allocators()
 {
 	for(auto& command_allocator : command_allocators){
-		THROW_IF_FAILED(device->CreateCommandAllocator(
-				D3D12_COMMAND_LIST_TYPE_DIRECT,
-				IID_PPV_ARGS(&command_allocator)));
+		THROW_IF_FAILED(device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT,IID_PPV_ARGS(&command_allocator)));
 	}
 }
 
@@ -282,9 +280,7 @@ void cg::renderer::dx12_renderer::create_pso(const std::string& shader_name)
 	pso_desc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
 	pso_desc.SampleDesc.Count = 1;
 
-	THROW_IF_FAILED(device->CreateGraphicsPipelineState(
-			&pso_desc,
-			IID_PPV_ARGS(&pipeline_state)))
+	THROW_IF_FAILED(device->CreateGraphicsPipelineState(&pso_desc,IID_PPV_ARGS(&pipeline_state)));
 }
 
 void cg::renderer::dx12_renderer::create_resource_on_upload_heap(ComPtr<ID3D12Resource>& resource, UINT size, const std::wstring& name)
@@ -308,16 +304,16 @@ void cg::renderer::dx12_renderer::create_resource_on_default_heap(ComPtr<ID3D12R
 
 void cg::renderer::dx12_renderer::copy_data(const void* buffer_data, UINT buffer_size, ComPtr<ID3D12Resource>& destination_resource)
 {
-	// TODO Lab: 3.03 Implement map, unmap, and copying data to the resource
-}
-
-void cg::renderer::dx12_renderer::copy_data(const void* buffer_data, const UINT buffer_size, ComPtr<ID3D12Resource>& destination_resource, ComPtr<ID3D12Resource>& intermediate_resource, D3D12_RESOURCE_STATES state_after, int row_pitch, int slice_pitch)
-{
 	UINT8* buffer_data_begin;
 	CD3DX12_RANGE read_range(0, 0);
 	THROW_IF_FAILED(destination_resource->Map(0, &read_range, reinterpret_cast<void**>(&buffer_data_begin)));
 	memcpy(buffer_data_begin, buffer_data, buffer_size);
 	destination_resource->Unmap(0, 0);
+}
+
+void cg::renderer::dx12_renderer::copy_data(const void* buffer_data, const UINT buffer_size, ComPtr<ID3D12Resource>& destination_resource, ComPtr<ID3D12Resource>& intermediate_resource, D3D12_RESOURCE_STATES state_after, int row_pitch, int slice_pitch)
+{
+
 }
 
 D3D12_VERTEX_BUFFER_VIEW cg::renderer::dx12_renderer::create_vertex_buffer_view(const ComPtr<ID3D12Resource>& vertex_buffer, const UINT vertex_buffer_size)
@@ -431,14 +427,12 @@ void cg::renderer::dx12_renderer::populate_command_list()
 {
 	//Reset
 	THROW_IF_FAILED(command_allocators[frame_index]->Reset());
-	THROW_IF_FAILED(command_list->Reset(
-			command_allocators[frame_index].Get(),
-			pipeline_state.Get()));
+	THROW_IF_FAILED(command_list->Reset(command_allocators[frame_index].Get(),pipeline_state.Get()));
 	//Initial state
 	command_list->SetGraphicsRootSignature(root_signature.Get());
 	ID3D12DescriptorHeap* heap[] = {cbv_srv_heap.get()};
 	command_list->SetDescriptorHeaps(_countof(heap), heap);
-	command_list->SetComputeRootDescriptorTable(0, cbv_srv_heap.get_gpu_descriptor_handle(0));
+	command_list->SetGraphicsRootDescriptorTable(0, cbv_srv_heap.get_gpu_descriptor_handle(0));
 	command_list->RSSetViewports(1, &view_port);
 	command_list->RSSetScissorRects(1, &scissor_rect);
 	command_list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -455,7 +449,7 @@ void cg::renderer::dx12_renderer::populate_command_list()
 			&rtv_heap.get_cpu_descriptor_handle(frame_index),
 			FALSE,
 			nullptr);
-	const float clear_color[] = {0.f, 0.f, 1.f};
+	const float clear_color[] = {0.f, 0.f, 0.f};
 	command_list->ClearRenderTargetView(
 			rtv_heap.get_cpu_descriptor_handle(frame_index),
 			clear_color, 0, nullptr);
@@ -502,9 +496,7 @@ void cg::renderer::descriptor_heap::create_heap(ComPtr<ID3D12Device>& device, D3
 	heap_desc.NumDescriptors = number;
 	heap_desc.Type = type;
 	heap_desc.Flags = flags;
-	THROW_IF_FAILED(device->CreateDescriptorHeap(
-			&heap_desc,
-			IID_PPV_ARGS(&heap)));
+	THROW_IF_FAILED(device->CreateDescriptorHeap(&heap_desc,IID_PPV_ARGS(&heap)));
 	descriptor_size = device->GetDescriptorHandleIncrementSize(type);
 }
 
